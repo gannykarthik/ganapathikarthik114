@@ -1,7 +1,3 @@
-# flight_search_api.py
-# -------------------------------------------------------
-# FastAPI endpoint wrapping the mock flight scraper
-# -------------------------------------------------------
 
 from fastapi import FastAPI
 from flight_search_automation import scrape_flights
@@ -26,3 +22,4 @@ def search_flights(origin: str, destination: str, journey_date: str = "2025-11-1
         "total_flights": len(flights),
         "flights": flights
     }
+
