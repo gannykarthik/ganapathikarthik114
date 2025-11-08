@@ -1,0 +1,32 @@
+[
+  {
+    "airline": "IndiGo",
+    "flight_number": "6E-123",
+    "departure": "06:30",
+    "arrival": "09:10",
+    "price": "₹5,450",
+    "origin": "Bangalore",
+    "destination": "Delhi",
+    "searchdatetime": "2025-11-08T06:17:05.431399Z"
+  },
+  {
+    "airline": "Air India",
+    "flight_number": "AI-504",
+    "departure": "07:15",
+    "arrival": "09:55",
+    "price": "₹6,120",
+    "origin": "Bangalore",
+    "destination": "Delhi",
+    "searchdatetime": "2025-11-08T06:17:05.431399Z"
+  },
+  {
+    "airline": "Vistara",
+    "flight_number": "UK-811",
+    "departure": "08:20",
+    "arrival": "10:55",
+    "price": "₹6,780",
+    "origin": "Bangalore",
+    "destination": "Delhi",
+    "searchdatetime": "2025-11-08T06:17:05.431399Z"
+  }
+]
