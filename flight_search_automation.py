@@ -1,7 +1,4 @@
-# flight_search_automation.py
-# -------------------------------------------------------
-# Mock version of flight scraper for TripGain assignment
-# -------------------------------------------------------
+
 
 from datetime import datetime
 import json
@@ -64,7 +61,6 @@ def scrape_flights(origin, destination, date):
         }
     ]
 
-    # Save JSON file locally
     with open("flight_results.json", "w", encoding="utf-8") as f:
         json.dump(flights, f, indent=2, ensure_ascii=False)
 
@@ -72,7 +68,7 @@ def scrape_flights(origin, destination, date):
     return flights
 
 
-# Run directly (for standalone testing)
 if __name__ == "__main__":
     results = scrape_flights("Bangalore", "Delhi", "2025-11-18")
     print(json.dumps(results, indent=2, ensure_ascii=False))
+
