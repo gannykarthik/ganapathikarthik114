@@ -1,71 +1,72 @@
 from playwright.sync_api import sync_playwright
 from datetime import datetime
 import json
-import time
 
 
 def scrape_flights(origin: str, destination: str, journey_date: str):
-    """
-    Opens BudgetTicket in a visible browser window, simulates a flight search,
-    and returns mock flight results in the required JSON format.
-    """
-
-    print(f"🌍 Launching visible browser for {origin} → {destination} ({journey_date})")
+    """Scrape live flight data from budgetticket.in (no hardcoded data)."""
+    flights = []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=250)
+        browser = p.chromium.launch(headless=False, slow_mo=300)
         page = browser.new_page()
-        page.goto("https://www.budgetticket.in/", timeout=60000)
-        print("✅ Website opened")
+        page.goto("https://www.budgetticket.in", timeout=60000)
+        page.wait_for_load_state("networkidle")
 
-        # --- optional visual pause so evaluator sees automation running ---
-        time.sleep(6)
+        # --- Fill origin, destination, and date fields dynamically ---
+        # Adjust selectors based on the site's actual structure.
+        page.click("input[placeholder*='From']")        # open 'From' dropdown
+        page.keyboard.type(origin)
+        page.keyboard.press("Enter")
 
-        # Close the browser (site fields are dynamic React components)
+        page.click("input[placeholder*='To']")          # open 'To' dropdown
+        page.keyboard.type(destination)
+        page.keyboard.press("Enter")
+
+        page.click("input[type='date'], input[placeholder*='Date']")  # date picker
+        page.fill("input[type='date'], input[placeholder*='Date']", journey_date)
+        page.keyboard.press("Enter")
+
+        # Click the search button
+        page.click("button:has-text('Search')")
+
+        print("🔎 Waiting for flight results...")
+        page.wait_for_load_state("networkidle")
+
+        # --- Extract all visible flight results dynamically ---
+        page.wait_for_selector("div.flight-item, .flight-result", timeout=60000)
+        cards = page.query_selector_all("div.flight-item, .flight-result")
+        print(f"✅ Found {len(cards)} flight elements.")
+
+        for card in cards:
+            try:
+                airline = card.query_selector(".airline-name, .name, .carrier").inner_text()
+                flight_no = card.query_selector(".flight-number, .code").inner_text()
+                dep = card.query_selector(".departure-time, .depart, .time").inner_text()
+                arr = card.query_selector(".arrival-time, .arrival, .arrive").inner_text()
+                price = card.query_selector(".price, .fare, .amount").inner_text()
+
+                flights.append({
+                    "airline": airline,
+                    "flight_number": flight_no,
+                    "departure": dep,
+                    "arrival": arr,
+                    "price": price,
+                    "origin": origin,
+                    "destination": destination,
+                    "searchdatetime": datetime.utcnow().isoformat() + "Z"
+                })
+            except Exception:
+                continue
+
         browser.close()
 
-    # ---------- Mocked flight data (stable for submission) ----------
-    flights = [
-        {
-            "airline": "IndiGo",
-            "flight_number": "6E-123",
-            "departure": "06:30",
-            "arrival": "09:10",
-            "price": "₹5,450",
-            "origin": origin,
-            "destination": destination,
-            "searchdatetime": datetime.utcnow().isoformat() + "Z"
-        },
-        {
-            "airline": "Air India",
-            "flight_number": "AI-504",
-            "departure": "07:15",
-            "arrival": "09:55",
-            "price": "₹6,120",
-            "origin": origin,
-            "destination": destination,
-            "searchdatetime": datetime.utcnow().isoformat() + "Z"
-        },
-        {
-            "airline": "Vistara",
-            "flight_number": "UK-811",
-            "departure": "08:20",
-            "arrival": "10:55",
-            "price": "₹6,780",
-            "origin": origin,
-            "destination": destination,
-            "searchdatetime": datetime.utcnow().isoformat() + "Z"
-        }
-    ]
-
-    # Save the results
+    # Save results to JSON file
     with open("flight_results.json", "w", encoding="utf-8") as f:
         json.dump(flights, f, indent=2, ensure_ascii=False)
-
-    print(f"📝 Saved {len(flights)} results → flight_results.json")
+    print(f"📝 Saved {len(flights)} flights → flight_results.json")
     return flights
 
 
-# --- Run directly for local test ---
 if __name__ == "__main__":
     scrape_flights("Bangalore", "Delhi", "2025-11-18")
